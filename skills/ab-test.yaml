@@ -1,0 +1,35 @@
+name: ab-test
+description: Generate A/B test variants for landing page copy — hero headlines, CTA buttons, pricing anchors, and email subject lines. Uses parallel Haiku calls; reads existing landing page copy for context.
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/ab-test.sh <product-name> [all|hero|cta|pricing|email-subject] [n-variants: 3-5]
+script: skills/ab-test.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  element: "all (default) | hero | cta | pricing | email-subject"
+  n-variants: "Number of variants per element: 3 (default) | 4 | 5"
+examples:
+  - bash skills/ab-test.sh bankruptcy-app all 3
+  - bash skills/ab-test.sh bankruptcy-app hero 5
+  - bash skills/ab-test.sh cleardebt cta 4
+  - bash skills/ab-test.sh bankruptcy-app pricing 3
+  - bash skills/ab-test.sh fairsend email-subject 4
+output: |
+  For each variant:
+  - The variant text (headline+subhead, button label, pricing frame, or subject line)
+  - Hypothesis: one-line reason it might outperform the control
+  - Best for: specific audience segment
+  - Traffic split: recommended % of test traffic
+  Saved to: obsidian/notes/ab-test-<product>-<date>.md
+  Also copied to: <product>/marketing/09-ab-test-variants.md (if marketing folder exists)
+elements:
+  hero: H1 headline + subheadline combinations (6-10 word H1, 15-25 word subhead)
+  cta: CTA button text (3-6 words) + urgency supporting line beneath it
+  pricing: Pricing anchor / value framing statements (3-8 words near price/CTA)
+  email-subject: First lead-nurture email subject lines (max 50 chars, mixed triggers)
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+agents: 2 (hero+cta parallel, pricing+email-subject parallel)
+runtime: ~20-30 seconds (parallel calls)
+context: reads <product>/marketing/06-landing-page-copy.md if present
+live_site: apex.socialtokens.site/bankruptcy/

@@ -1,0 +1,14 @@
+name: ugc-script-gen
+description: Generate UGC video scripts (TikTok/Reels/YouTube Shorts) for any Apex product
+usage: bash skills/ugc-script-gen.sh <product-name> [platform] [duration]
+arguments:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  platform: "tiktok (default) | reels | youtube-shorts"
+  duration: "30 | 60 (default) | 90 seconds"
+examples:
+  - bash skills/ugc-script-gen.sh cleardebt tiktok 60
+  - bash skills/ugc-script-gen.sh voice-messenger reels 30
+  - bash skills/ugc-script-gen.sh bankruptcy-app youtube-shorts 90
+output: 3 UGC scripts with hook, problem, solution, proof, CTA, and visual direction notes
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787

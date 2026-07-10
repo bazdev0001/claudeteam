@@ -1,0 +1,31 @@
+name: landing-page
+description: Generate complete landing page copy — hero, problem/solution, features, how it works, social proof, FAQ, CTA, footer — ready to paste into any landing page builder
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/landing-page.sh <product-name> [target-persona] [tone: professional|conversational|urgent]
+script: skills/landing-page.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  persona: "Who you're writing for (default: 'distressed debtor')"
+  tone: "professional | conversational (default) | urgent"
+examples:
+  - bash skills/landing-page.sh bankruptcy-app "stressed debtor" urgent
+  - bash skills/landing-page.sh cleardebt "small business owner" professional
+  - bash skills/landing-page.sh voice-messenger "remote team manager" conversational
+output: |
+  - Nav bar copy + 3 nav links + CTA button text
+  - Hero H1 + subheadline + CTA + social proof line + 3 A/B headline variants
+  - Trust bar: 4 trust signals
+  - Problem section: headline + 3 pain bullets
+  - Solution: product description + 3 feature blocks
+  - How it works: 3-step process
+  - Social proof: 3 testimonial templates + stat block
+  - FAQ: 6 objection-handling answers
+  - Final CTA: headline + risk reversal + reassurance
+  - Footer: tagline + legal disclaimer + link structure
+  Saved to: obsidian/notes/landing-page-<product>-<date>.md
+  Also copied to: <product>/marketing/06-landing-page-copy.md (if marketing folder exists)
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+agents: 3 (hero, features, close)
+runtime: ~45-60 seconds

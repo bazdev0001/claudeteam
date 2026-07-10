@@ -1,0 +1,28 @@
+name: app-onboarding
+description: Generate complete in-app copy for a mobile app's onboarding experience — splash screen, 4-screen onboarding flow, permission prompts, empty states, push notification templates, app rating prompt, and human-friendly error messages
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/app-onboarding.sh <product-name> [persona] [warm|professional|urgent]
+script: skills/app-onboarding.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  persona: "Who the user is (default: 'new user') — e.g. 'distressed debtor', 'first-time filer'"
+  tone: "warm (default) | professional | urgent"
+examples:
+  - bash skills/app-onboarding.sh bankruptcy-app "distressed debtor" warm
+  - bash skills/app-onboarding.sh cleardebt "first-time filer" professional
+  - bash skills/app-onboarding.sh voice-messenger "busy professional" warm
+output: |
+  1. Splash/loading screen: tagline + loading message
+  2. Onboarding flow (4 screens): headline, body, CTA, skip link, illustration description
+  3. Permissions prompts: camera/OCR + notifications, with WHY copy
+  4. Empty states: dashboard, documents, checklist
+  5. Push notifications: 6 templates (welcome, D+1, upload confirm, milestone, D+7, D+30)
+  6. App rating prompt: timing trigger, headline, body, button text
+  7. Error messages: 5 common errors rewritten as human-friendly copy
+  Saved to: obsidian/notes/app-onboarding-<product>-<date>.md
+  Also copied to: <product>/marketing/10-app-onboarding-copy.md (if marketing folder exists)
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+agents: 2 parallel (screens/splash/permissions + empty-states/notifications/rating/errors)
+runtime: ~20-35 seconds

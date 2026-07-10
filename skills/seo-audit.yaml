@@ -1,0 +1,13 @@
+name: seo-audit
+description: SEO audit for any URL or Apex product — quick wins, keywords, competitor gaps, 30-day action plan
+usage: bash skills/seo-audit.sh <url-or-product-name> [extra-context]
+arguments:
+  url-or-product-name: A live URL (https://...) or product name (matches /home/barry/apex/projects/)
+  extra-context: Optional niche/market description to improve relevance
+examples:
+  - bash skills/seo-audit.sh https://cleardebt.app
+  - bash skills/seo-audit.sh cleardebt 'debt settlement app for US consumers'
+  - bash skills/seo-audit.sh voice-messenger 'voice messaging PWA for professionals'
+output: Full SEO report saved to /home/barry/projects/obsidian/notes/seo-audit-<product>-<date>.md
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787; no external API keys needed

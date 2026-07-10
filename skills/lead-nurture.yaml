@@ -1,0 +1,28 @@
+name: lead-nurture
+description: Generate a 5-email lead nurture drip sequence for intake form signups — welcome (Day 0), education (Day 2), social proof (Day 4), objection handler (Day 7), urgency CTA (Day 10). Each email includes subject line + 2 A/B variants, preview text, plain-text body, HTML structure, and CTA button
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/lead-nurture.sh <product-name> [persona] [convert|educate|reactivate]
+script: skills/lead-nurture.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  persona: "Who filled the form — e.g. 'distressed debtor', 'small business owner' (default: prospect)"
+  goal: "convert (default) | educate | reactivate"
+examples:
+  - bash skills/lead-nurture.sh bankruptcy-app "distressed debtor" convert
+  - bash skills/lead-nurture.sh cleardebt "someone behind on credit cards" educate
+  - bash skills/lead-nurture.sh voice-messenger "small business owner" reactivate
+output: |
+  5 emails across 3 API calls:
+    Email 1 (Day 0)  — Welcome + what happens next
+    Email 2 (Day 2)  — Educational: #1 thing they need to know
+    Email 3 (Day 4)  — Social proof: success story
+    Email 4 (Day 7)  — Objection handler: top 3 hesitations
+    Email 5 (Day 10) — Urgency / final CTA
+  Each email: subject line + 2 A/B variants, 100-char preview text, plain-text body, HTML structure, CTA button + URL placeholder
+  Saved to: obsidian/notes/lead-nurture-<product>-<date>.md
+  Also copied to: <product>/marketing/08-lead-nurture-sequence.md (if marketing folder exists)
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+agents: 3 (emails 1-2, emails 3-4, email 5)
+runtime: ~45-75 seconds

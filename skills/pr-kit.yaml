@@ -1,0 +1,24 @@
+name: pr-kit
+description: Generate a complete PR launch kit — AP-style press release, 5 personalised journalist pitches (fintech/legal-tech/startup/podcast/local), and media outreach strategy with tiered target list
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/pr-kit.sh <product-name> [launch|feature|milestone|funding] ["news hook"]
+script: skills/pr-kit.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  angle: "launch (default) | feature | milestone | funding"
+  hook: Optional one-line news hook to anchor the story (wrap in quotes)
+examples:
+  - bash skills/pr-kit.sh bankruptcy-app launch "First AI app to prep bankruptcy filings in 15 minutes"
+  - bash skills/pr-kit.sh cleardebt milestone "10,000 users saved average \$4,200 in attorney fees"
+  - bash skills/pr-kit.sh voice-messenger feature "Voice messages that auto-transcribe and summarize"
+output: |
+  - Press release (AP style: headline, subhead, dateline, body, quote, boilerplate, contact)
+  - 5 journalist pitch emails: fintech, legal-tech, consumer app, podcast/newsletter, local press
+  - Media strategy: Tier 1/2/3 targets, timing, embargo advice, 5 viral story angles, journalist headline templates
+  Saved to: obsidian/notes/pr-kit-<product>-<angle>-<date>.md
+  Also copied to: <product>/marketing/07-pr-kit.md (if marketing folder exists)
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+agents: 3 (press release, pitches, media strategy)
+runtime: ~45-60 seconds

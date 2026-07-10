@@ -1,0 +1,291 @@
+BAZMENT SYSTEM AUDIT PROMPT — Barry's Unified Agent Fleet
+Generated: 2026-07-02
+
+You are auditing the bazment system — the second-generation, unified Claude Code agent fleet
+for Barry. This replaces the older scattered "claudeteam" setup. Your job is to understand the
+architecture, identify what is and isn't working, and find gaps in the migration from the old system.
+
+════════════════════════════════════════════
+WHAT BAZMENT IS
+════════════════════════════════════════════
+
+Bazment is a single git repo (~/bazment/) that contains everything needed to run any agent
+on any host. One `git clone + install.sh` bootstraps a new host. All agents share the same
+directory structure, startup scripts, guardian, and vault sync. Config differences are per-agent
+files (soul.md, CLAUDE.md, MEMORY.md), not scattered scripts.
+
+Repo: github.com/bazdev0001/bazment (private)
+Location on mini-PC: ~/bazment/
+Location on VPS: ~/bazment/ (partially deployed — Ada uses legacy services, not bazment services)
+
+════════════════════════════════════════════
+DIRECTORY LAYOUT
+════════════════════════════════════════════
+
+bazment/
+├── agents/              ← per-agent identity + startup
+│   ├── default/         ← template: CLAUDE.md, MEMORY.md, rules.md, soul.md
+│   ├── sage/            ← Sage: soul.md, CLAUDE.md, MEMORY.md, knowledge.md, agents-execution.sh
+│   ├── ada/             ← Ada: same structure + agents-execution.sh
+│   ├── athena/          ← Athena: same
+│   ├── sophia/          ← Sophia: same
+│   ├── amy/             ← Amy: same (minimal — role undocumented)
+│   └── agents-general-execution.sh  ← runs on EVERY agent startup via SessionStart hook
+├── channels/            ← per-agent per-platform access config (access.json) + .env (gitignored)
+│   ├── sage/telegram/   ← settings.json, access.json, .env (TELEGRAM_BOT_TOKEN)
+│   ├── sage/discord/    ← settings.json, access.json, .env (DISCORD_BOT_TOKEN)
+│   ├── ada/telegram/
+│   ├── ada/discord/
+│   └── athena/discord/
+├── departments/         ← context.md per business domain (software, trading, socialmedia)
+├── projects/            ← context.md per project (makemerich, scandocs, etc.)
+├── scripts/             ← all shared operational scripts (see KEY SCRIPTS below)
+├── services/            ← systemd unit files + exec scripts for all agents
+│   ├── bazment-<agent>-<platform>.service
+│   ├── run-<agent>-<platform>.sh      ← sets env, cd to channel dir, wraps in PTY
+│   └── _exec-<agent>-<platform>.sh   ← loads soul, calls claude --channels
+├── data/                ← runtime only, gitignored (heartbeats, logs, TTS output)
+├── obsidian/            ← shared brain vault (symlinked or cloned from bazdev0001/obsidian)
+└── install.sh           ← bootstrap: installs services, sets up hooks, enables linger
+
+════════════════════════════════════════════
+AGENT FLEET
+════════════════════════════════════════════
+
+| Agent  | Host      | Channels          | Model   | Role                          |
+|--------|-----------|-------------------|---------|-------------------------------|
+| Sage   | mini-PC   | Discord+Telegram  | sonnet  | Software lead, strategic lead |
+| Athena | mini-PC   | Discord only      | sonnet  | Trading, quant strategy       |
+| Amy    | mini-PC   | Discord+Telegram  | sonnet  | Role undocumented             |
+| Ada    | VPS       | Discord+Telegram  | sonnet  | Company ops, always-on        |
+| Sophia | VPS       | Discord only      | opus-4-6| VPS software engineering      |
+
+Channel ownership:
+  #software    → Sage (mini-PC tasks), Sophia (VPS tasks)
+  #management  → Sage + Ada (cross-node coordination)
+  #trading     → Athena only
+
+════════════════════════════════════════════
+HOW AN AGENT STARTS (8-STEP SEQUENCE)
+════════════════════════════════════════════
+
+Step 0 — systemd fires the service
+  bazment-sage-telegram.service
+  → services/run-sage-telegram.sh  (sets BAZMENT_AGENT=sage, BAZMENT_ROOT, cd to channel dir)
+  → services/_exec-sage-telegram.sh wrapped in: script -qfc ... /dev/null
+  → loads agents/sage/soul.md via --append-system-prompt
+  → exec claude --dangerously-skip-permissions --model sonnet
+        --channels plugin:telegram@claude-plugins-official
+
+Step 1 — Claude auto-loads CLAUDE.md
+  agents/default/CLAUDE.md (base rules, ≤200 lines)
+  agents/<name>/CLAUDE.md (agent-specific extensions)
+
+Step 2 — Claude auto-loads MEMORY.md
+  agents/default/MEMORY.md + agents/<name>/MEMORY.md
+
+Step 3 — SessionStart hook fires agents-general-execution.sh
+  Injects (by printing to stdout — Claude Code reads hook output as context):
+  - obsidian/00-Briefing.md + today's journal
+  - obsidian/DECISIONS.md (settled decisions — do not re-propose)
+  - obsidian/notes/LEARNINGS.md + FRICTION-LOG.md (lessons + known mistakes)
+  - obsidian/notes/AGENTS.md (fleet registry)
+  - agents/default/rules.md (full rulebook — no 200-line cap, injected here)
+  - fleet + agent MEMORY.md
+  - obsidian/log/<date>.md (3h distilled conversation digest)
+  - obsidian/log-raw/<date>.md (last 100 lines, raw, marked UNTRUSTED)
+  - Environment map (paths, host, agent name)
+  - Open GitHub issues assigned to this agent
+  - Writes heartbeat to data/agents/<name>/heartbeat
+
+Step 4 — agents/<name>/agents-execution.sh
+  Injects department context, open tasks, agent-specific startup (Athena: trading signals, etc.)
+
+════════════════════════════════════════════
+THE 97% RULE (critical — agents must know this)
+════════════════════════════════════════════
+
+Before asking Barry OR another agent ANY question, complete all 8 steps:
+  0. git pull — get latest vault
+  1. obsidian/00-Briefing.md — in fleet state?
+  2. obsidian/DECISIONS.md — already settled?
+  3. Today's journal — happened today?
+  4. obsidian/tasks/ — existing task covers it?
+  5. obsidian/notes/LEARNINGS.md — fleet already knows?
+  6. obsidian/notes/FRICTION-LOG.md — known mistake?
+  7. departments/<dept>/context.md — domain answer?
+  8. agents/<name>/MEMORY.md — agent-specific fact?
+
+All 8 fail → only then ask Barry. Skipping any step → FRICTION-LOG entry.
+This is called the 97% rule because Barry expects 97% of questions answered from vault without asking.
+
+════════════════════════════════════════════
+THE BUN BRIDGE BUG (critical operational knowledge)
+════════════════════════════════════════════
+
+Each claude channel session spawns a bun bridge child:
+  bun run --cwd ~/.claude/plugins/cache/claude-plugins-official/telegram/<ver> start
+
+This bun bridge is the ONLY thing that polls Telegram/Discord and sends replies.
+Claude's normal text output NEVER reaches Barry — every reply must go through the reply MCP tool.
+
+UPSTREAM BUG: The bun bridge dies mid-session while claude keeps running. systemd sees
+"active" and never fires Restart=always. Node is deaf+mute but looks healthy to systemctl/ps.
+
+PLUGIN SETTINGS FRAGILITY: The bun bridge also requires ~/.claude/channels/<plugin>/settings.json
+(or bazment/channels/<agent>/<platform>/settings.json) with:
+  { "enabledPlugins": {"telegram": true}, "dmPolicy": "allowlist", "allowFrom": ["6062064959"] }
+Without this file the bridge silently fails to start. Running `claude plugin install` wipes it.
+Each _exec-*.sh should recreate settings.json if missing before calling claude.
+
+════════════════════════════════════════════
+RELIABILITY LAYER
+════════════════════════════════════════════
+
+bazment-guardian.service — daemon, 5s loop, two detectors:
+  1. DEAD BRIDGE: reads /sys/fs/cgroup/.../cgroup.procs, checks for live bun process per service.
+     If missing 2 consecutive sweeps (~10s), restarts the service.
+  2. FROZEN SESSION: bridge is alive but inbox has messages older than 10min = session wedged.
+     Detected via inbox dir file age. Restarts the service.
+  Auto-discovers which bazment-* services are enabled — no hardcoded list.
+
+bazment-vault-sync.timer — every 5min, git pull bazment repo + pull/push obsidian vault.
+
+bazment-ada-vps-watchdog.timer — every 5min, reads Ada's heartbeat file from shared vault,
+  alerts via Telegram if heartbeat stale >30min. (NOTE: heartbeat cron NOT deployed on VPS yet.)
+
+True health check: bash ~/bazment/scripts/fleet-status.sh
+
+════════════════════════════════════════════
+KEY SCRIPTS (bazment/scripts/)
+════════════════════════════════════════════
+
+  tts-say.sh           — Piper TTS → .ogg (mini-PC only, offline). Sage attaches to every reply.
+  transcribe.sh        — faster-whisper transcription (offline, WSL-native). Use this, not tg-transcribe.
+  vault-sync.sh        — git pull bazment + pull/push obsidian vault
+  guardian.sh          — bridge watchdog daemon (bridge-death + frozen-session)
+  agent-heartbeat.sh   — writes timestamp to data/agents/<name>/heartbeat
+  session-end.sh       — commit/push vault before a session reset
+  digest-log.sh        — distill log-raw/ → 3h structured digest in obsidian/log/
+  log-conversation.sh  — PostToolUse hook: appends reply tool calls to log-raw/
+  monthly-research.sh  — monthly deep-research report triggered by timer
+  ada-vps-watchdog.sh  — cross-node liveness check for Ada (reads shared git heartbeat)
+
+════════════════════════════════════════════
+CRON / TIMER SERVICES
+════════════════════════════════════════════
+
+  bazment-vault-sync.timer        — every 5min: sync obsidian vault to GitHub
+  bazment-guardian.timer          — daemon (5s loop): bridge watchdog
+  bazment-daily-plan.service      — 06:02 daily: 6am attack plan → Telegram
+  bazment-daily-eod.service       — 21:03 daily: 9pm EOD capture → Telegram + vault
+  bazment-distill-log.timer       — every 3h: distill log-raw/ → log/ digest
+  bazment-ada-vps-watchdog.timer  — every 5min: Ada liveness check
+  bazment-monthly-research-*.timer — 1st of month: deep research per agent
+
+════════════════════════════════════════════
+MIGRATION STATUS — OLD CLAUDETEAM → BAZMENT
+════════════════════════════════════════════
+
+MIGRATED (feature exists in bazment):
+  bin/tg-say.sh                → scripts/tts-say.sh ✅
+  bin/transcribe.sh            → scripts/transcribe.sh ✅
+  bin/vault-sync.sh            → scripts/vault-sync.sh ✅
+  bin/fleet-status.sh          → scripts/fleet-status.sh ✅
+  bin/tc-bridge-guardian.sh    → scripts/guardian.sh ✅ (upgraded: adds frozen-session detection)
+  bin/daily-report.sh          → bazment-daily-plan + bazment-daily-eod timers ✅
+  bin/distill-discussions.sh   → scripts/distill-log.sh ✅
+  bin/session-briefing.sh      → agents-general-execution.sh (much more comprehensive) ✅
+  Per-node soul files           → agents/<name>/soul.md (unified location) ✅
+  Nightly reset (claudeteam-reset.timer) → NOT YET in bazment ❌
+
+NOT MIGRATED / MISSING IN BAZMENT:
+  claudeteam-reset.timer       ← nightly context reset (04:00 PDT). No bazment equivalent.
+                                  Without this, Sage's context grows indefinitely until OOM or stall.
+  bin/fleet-alerter.sh         ← Telegram alert when guardian heals/fails. Missing in bazment.
+  bin/sync-discord-access.sh   ← syncs Discord access allowlists. Missing.
+  bin/sync-discord-channels.py ← discovers Discord channel IDs. Missing.
+  bin/council.py               ← multi-model LLM council. Not ported (skill handles it now).
+  bin/tg-typing-pulse.sh       ← typing indicator for Telegram. Missing.
+  bin/watch-video.sh           ← video analysis (but /watch skill covers this). Low priority.
+  bin/agent-bridge.py/.sh      ← obsolete Python bridge, pre-bun-plugin era. Not needed.
+
+NOT IN BAZMENT (new claudeteam-only services, unclear if needed):
+  tc-discord-access-sync.service/timer
+  tc-idle-monitor.service
+  tc-response-monitor.service/timer
+  tc-typing-indicator.service/timer
+  tc-working-monitor.service
+  → Audit needed: are these still used? Safe to decommission?
+
+VPS MIGRATION STATUS:
+  Ada (VPS) is still running LEGACY services (claude-ada-discord + claude-ada-telegram), NOT bazment services.
+  install.sh ada has NOT been run on the VPS.
+  Ada's exec scripts are in ~/bin/ on the VPS, not ~/bazment/services/.
+  The heartbeat cron (ada-heartbeat-push.sh) is NOT in the VPS crontab → watchdog gives false alarms.
+
+════════════════════════════════════════════
+KNOWN ISSUES AS OF 2026-07-02
+════════════════════════════════════════════
+
+1. NO NIGHTLY RESET in bazment — claudeteam-reset.timer exists for Sage's old service but
+   bazment-sage-telegram has no equivalent. Sage's context will grow indefinitely.
+
+2. Ada VPS heartbeat cron missing — bazment-ada-vps-watchdog gives false "missing" alarms.
+   Fix: ssh apex@srv1601002.hstgr.cloud, add to crontab:
+     */5 * * * * bash ~/bazment/scripts/ada-heartbeat-push.sh
+   (Check if this script exists on VPS; may need to be copied from mini-PC.)
+
+3. Ada still on legacy VPS services — not using bazment structure. Config drift risk.
+
+4. Amy agent has no documented role, soul file quality unknown, no owner.
+
+5. Two service families running simultaneously (claudeteam-* AND bazment-*) for Sage and Athena.
+   Both use the same Telegram/Discord bot tokens. Likely causing duplicate processing or conflicts.
+
+6. Plugin settings.json not auto-recreated in most _exec-*.sh scripts.
+   Only recently fixed for Ada Telegram (2026-07-01). Others still vulnerable.
+
+7. distill-capture.service (claudeteam family) — FAILED state.
+
+════════════════════════════════════════════
+AREAS TO AUDIT
+════════════════════════════════════════════
+
+1. TWO SERVICE FAMILIES: Are claudeteam-* and bazment-* services for Sage/Athena running
+   simultaneously? Which should be the authoritative one? Decommission plan needed.
+
+2. NIGHTLY RESET: Does any bazment service have a context reset timer? If not, add one.
+   Check: systemctl --user list-timers | grep reset
+
+3. SETTINGS.JSON SELF-HEAL: Does every bazment services/_exec-*.sh recreate settings.json
+   in the channel dir before calling claude? Check each script.
+
+4. ADA VPS MIGRATION: Is install.sh ada planned? What's blocking it?
+   Check VPS: does ~/bazment/ exist on apex@srv1601002.hstgr.cloud?
+
+5. HEARTBEAT CRON: ssh apex@srv1601002.hstgr.cloud "crontab -l" — is ada-heartbeat-push.sh there?
+
+6. AMY: Read bazment/agents/amy/soul.md and CLAUDE.md. What is her actual role?
+   Check bazment/channels/amy/ — are bot tokens configured?
+
+7. FLEET ALERTER: Nothing in bazment sends a Telegram alert when guardian heals/kills a bridge.
+   The old claudeteam had fleet-alerter.sh. Should this be ported?
+
+8. FROZEN SESSION DETECTOR: Does bazment-guardian actually work? Check:
+   systemctl --user status bazment-guardian.service --no-pager -n 10
+
+9. LINGER: loginctl show-user barry | grep Linger — must be "yes" or services die on logout.
+
+10. SECRET HYGIENE: Are any tokens in systemd unit files or visible in ps cmdlines?
+    Check: ps aux | grep claude | grep TOKEN — should be empty. Tokens must be in .env only.
+
+Key files to read first:
+  ~/bazment/README.md
+  ~/bazment/agents/STARTUP.md
+  ~/bazment/agents/default/CLAUDE.md
+  ~/bazment/agents/default/rules.md
+  ~/bazment/services/README.md
+  ~/bazment/install.sh
+
+END OF AUDIT PROMPT

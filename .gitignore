@@ -1,0 +1,40 @@
+# Secrets and credentials — NEVER commit these
+*.env
+.env*
+*token*
+*secret*
+*credential*
+*key*
+*.pem
+*.p12
+*.pfx
+
+# Channel state (Telegram/Discord inboxes, bot state)
+channels/
+channels-discord/
+
+# TTS and video output
+.tts-out/
+.video-out/
+.council-out/
+
+# Python virtualenv
+.venv-voice/
+.venv/
+__pycache__/
+*.pyc
+
+# Temp and logs
+tmp/
+*.log
+*.tmp
+
+# State files (session-level, not config)
+.state/
+
+# Large binary assets (voice model files)
+voices/*.onnx
+voices/*.onnx.json
+
+# Claude Code internal state
+.claude/

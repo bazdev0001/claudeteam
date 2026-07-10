@@ -1,0 +1,40 @@
+name: watch
+description: Watch and analyze videos (YouTube, Zoom, Loom, local files). Extracts transcript + keyframes using local tools (no API).
+version: 1.0.0
+author: Doss (mini-PC fleet)
+
+command: /watch
+usage: /watch <video-url-or-path> [max_frames=12]
+
+examples:
+  - /watch https://youtu.be/iYG5tiFfK3E?si=ZlDqwBMtE_BfynDS
+  - /watch https://zoom.us/rec/share/xyz
+  - /watch /path/to/local/video.mp4
+
+dependencies:
+  - yt-dlp (YouTube downloads)
+  - ffmpeg (frame extraction, scene detection)
+  - faster-whisper (local speech-to-text, no API)
+  - Claude vision (frame analysis)
+
+what_it_does:
+  1. Downloads video (if URL) or reads local file
+  2. Extracts audio transcript (YouTube captions or Whisper fallback)
+  3. Extracts key frames using scene detection (not random frames)
+  4. Claude analyzes transcript + visuals together
+  5. Returns structured summary with visual insights
+  6. Optionally saves to Obsidian vault
+
+capabilities:
+  - Youtube videos
+  - Zoom recordings
+  - Loom videos
+  - Local video files
+  - Scene-smart frame extraction
+  - Full transcript generation
+  - Visual + audio analysis
+  - Obsidian integration
+
+scope: Mini-PC only (yt-dlp + ffmpeg + Whisper installed here)
+api_calls: Zero (fully local)
+output: transcript.txt + frames/*.png + structured analysis

@@ -1,0 +1,186 @@
+SYSTEM AUDIT PROMPT — Barry's Mini-PC Agent Fleet
+Generated: 2026-07-02
+
+You are auditing an always-on Claude Code agent fleet running on a Windows 11 machine (WSL2/Ubuntu). The owner is Barry. Your job is to review the system for reliability, correctness, and gaps, then report your findings.
+
+═══ HOSTS ═══
+
+Mini-PC (primary): barry@WIN-7DH33J46E3Q, running Ubuntu under WSL2
+  - ~/projects/claudeteam/   — the fleet codebase (systemd services, scripts, skills)
+  - ~/projects/obsidian/     — the shared brain vault (git-synced to private GitHub)
+  - ~/bazment/               — second-generation system in parallel development
+VPS (secondary): apex@srv1601002.hstgr.cloud — always-on Linux node
+
+═══ AGENT FLEET ═══
+
+Mini-PC runs 5 always-on Claude Code channel sessions via systemd --user services:
+
+  Sage (tc2) — software/general agent, strategic lead
+    - Telegram: claudeteam-channel-tc2.service → @Bazminipcclaude02bot
+    - Discord:  claudeteam-channel-discord.service → Sage bot in "The Bazment" server
+    Also: bazment-sage-telegram.service + bazment-sage-discord.service (second-gen services)
+
+  Athena (tc1) — trading node
+    - Telegram: claudeteam-channel.service → @Bazminipcclaudecode3bot (legacy name)
+    - Discord:  claudeteam-channel-discord-athena.service
+
+  Amy — newer agent (purpose TBD)
+    - Telegram: bazment-amy-telegram.service
+    - Discord:  bazment-amy-discord.service
+
+VPS runs:
+  Ada — company ops / VPS node
+    - Telegram: claude-ada-telegram.service
+    - Discord:  claude-ada-discord.service
+  Sophia — VPS Discord agent
+    - Discord:  claude-sophia-discord.service
+
+═══ HOW A CHANNEL SESSION WORKS ═══
+
+Each service runs a chain:
+  systemd → start-*.sh → script -qfc (pseudo-TTY) → _channel-exec-*.sh
+    → claude --dangerously-skip-permissions --model sonnet
+         --channels plugin:telegram@claude-plugins-official
+         [--append-system-prompt <soul>]
+
+When claude starts with --channels, it spawns a BUN bridge child process:
+  bun run --cwd ~/.claude/plugins/cache/claude-plugins-official/telegram/<version> start
+
+The bun bridge is the ONLY part that polls Telegram/Discord and sends replies.
+Claude's normal text output does NOT reach the user — every reply must go through
+the reply MCP tool call.
+
+KNOWN UPSTREAM BUG: The bun bridge child can die while the claude parent keeps
+running. systemd sees the service as "active" so Restart=always never fires. The
+node is deaf+mute but looks healthy to naive checks (systemctl is-active, ps).
+
+═══ RELIABILITY LAYER ═══
+
+tc-bridge-guardian.service — runs every 5s, reads /sys/fs/cgroup/.../cgroup.procs
+  directly, checks each service has a live bun process matching its pattern. If
+  missing for 2 consecutive checks (~10s), restarts that service. Has Restart=always.
+
+bazment-guardian.service — similar guardian for the bazment-* family services.
+
+fleet-alerter.service — sends a Telegram DM when guardian heals or fails a bridge.
+
+True health check command:
+  bash ~/projects/claudeteam/bin/fleet-status.sh
+  (systemctl is-active and ps are unreliable due to the bridge-death bug)
+
+═══ MEMORY / SHARED BRAIN ═══
+
+~/projects/obsidian/ is a git repo synced to private GitHub every few minutes via:
+  bazment-vault-sync.timer → bazment-vault-sync.service → bin/vault-sync.sh
+
+Every session reads a briefing on start (SessionStart hook injects 00-Briefing.md
++ latest journal entry). Every session logs to journal/YYYY-MM-DD.md as it works.
+
+Nightly reset: claudeteam-reset.timer fires at 04:00 PDT → summarize context →
+restart fresh session so context never bloats indefinitely.
+
+═══ VOICE PIPELINE ═══
+
+Inbound voice (Telegram):
+  attachment_file_id in channel meta
+  → download_attachment MCP tool → local .oga file
+  → bash bin/transcribe.sh <path>  (faster-whisper medium.en, offline)
+  → treat transcript as the user's message text
+
+Outbound voice:
+  bash bin/tg-say.sh "<reply text>"  (Piper TTS, en_GB-jenny_dioco-medium, offline)
+  → outputs .ogg file path
+  → pass path in files arg of reply MCP tool
+
+Note: In native WSL sessions, use transcribe.sh directly. Do NOT use bin/tg-transcribe
+— that script calls wsl.exe which doesn't exist inside WSL.
+
+═══ PLUGIN SETTINGS — CRITICAL QUIRK ═══
+
+Each claude channel session needs:
+  ~/.claude/channels/<plugin-name>/settings.json
+to exist with { "enabledPlugins": {"telegram": true} } (or discord), or the bun
+bridge silently fails to start. The claude process launches fine and systemd reports
+"active" — but no messages are received and no replies can be sent.
+
+This file is NOT recreated on restart by default. Running `claude plugin install`
+mid-session also wipes it. Both have caused silent fleet failures.
+
+Fix pattern: each _channel-exec-*.sh script should recreate settings.json if
+missing before launching claude.
+
+═══ KEY SCRIPTS (mini-PC) ═══
+
+~/projects/claudeteam/bin/
+  fleet-status.sh            — true health view (cgroup-based bridge check)
+  tc-bridge-guardian.sh      — bridge watchdog daemon
+  transcribe.sh              — local Whisper transcription (WSL-native)
+  tg-say.sh                  — Piper TTS → ogg (for voice replies)
+  vault-sync.sh              — git pull/commit/push the obsidian vault
+  daily-report.sh            — 6am + 9pm Telegram summary (permanent systemd timers)
+  session-briefing.sh        — injected on SessionStart hook
+  _channel-exec-tc2.sh       — Sage Telegram exec (soul + claude launch)
+  _channel-exec-discord.sh   — Sage Discord exec
+  _channel-exec-discord-athena.sh — Athena Discord exec
+  _channel-exec.sh           — Athena Telegram exec
+
+~/bazment/scripts/  (VPS-side equivalents)
+  ada-vps-watchdog.sh        — cross-node liveness check (reads git heartbeat)
+  guardian.sh                — bazment bridge guardian
+  vault-sync.sh              — VPS vault sync
+
+═══ KNOWN ISSUES AS OF 2026-07-02 ═══
+
+1. distill-capture.service — FAILED state (distill-discussions.sh erroring, non-critical)
+
+2. Ada VPS watchdog — reporting "heartbeat file missing" because ada-heartbeat-push.sh
+   was never deployed to the VPS crontab. Watchdog has been giving false alarms.
+   Fix: ssh apex@srv1601002.hstgr.cloud and add to crontab:
+     */5 * * * * bash ~/bazment/scripts/ada-heartbeat-push.sh
+
+3. Plugin settings.json fragility — Ada Telegram was silently broken on 2026-07-01
+   because settings.json didn't exist in ~/.claude/channels/telegram/. Fixed manually.
+   The same vulnerability exists for any agent whose exec script doesn't auto-recreate it.
+
+4. Two parallel service families (claudeteam-* and bazment-*) for the same agents.
+   Sage and Athena each have TWO sets of running services. Unclear which is authoritative;
+   likely wastes resources and may cause duplicate responses or conflicts.
+
+5. Amy agent has running services (bazment-amy-telegram + bazment-amy-discord) but
+   no documented role, soul file, or purpose found.
+
+6. Ada Telegram service has TELEGRAM_STATE_DIR pointing to telegram-ada/ but the plugin
+   reads settings.json from the canonical telegram/ directory. These two paths are
+   mismatched. Fixed for today but structural mismatch remains.
+
+═══ AREAS TO AUDIT ═══
+
+1. Are both service families (claudeteam-* + bazment-*) needed, or is one obsolete?
+   Check: do claudeteam-channel-tc2 and bazment-sage-telegram both run simultaneously?
+
+2. Does every _channel-exec-*.sh script recreate settings.json on startup?
+   Check all scripts in ~/projects/claudeteam/bin/ and ~/bazment/scripts/ + VPS equivalents.
+
+3. Is ada-heartbeat-push.sh in the VPS crontab? (ssh apex@srv1601002.hstgr.cloud "crontab -l")
+
+4. What is Amy's soul/system-prompt? Is her service correctly configured?
+
+5. Does fleet-status.sh cover bazment-* services, or only claudeteam-* ones?
+   If not, the bazment-* agents have no health monitoring.
+
+6. Does claudeteam-reset.timer (nightly at 04:00 PDT) summarize before restarting,
+   or does it just kill the session? Check claudeteam-reset.service ExecStart.
+
+7. Is `loginctl enable-linger barry` set in WSL? (loginctl show-user barry | grep Linger)
+
+8. Are there any token/API key secrets exposed in systemd unit files, journal logs,
+   or process cmdlines (visible via ps aux)?
+
+Key files to read first:
+  ~/projects/claudeteam/ARCHITECTURE.md
+  ~/projects/claudeteam/FLEET-OPS.md
+  ~/projects/claudeteam/DECISIONS.md
+  ~/projects/obsidian/00-Briefing.md
+  ~/projects/obsidian/STATUS.md
+
+END OF AUDIT PROMPT

@@ -1,0 +1,20 @@
+name: social-post-gen
+description: Generate platform-specific social media posts for any Apex product
+usage: /social-post-gen <product-name> [target-audience] [tone: professional|casual|hype]
+script: skills/social-post-gen.sh
+args:
+  - name: product
+    required: true
+    description: Product name (also used to look up /home/barry/apex/projects/<product>/DESIGN.md or README.md)
+  - name: audience
+    required: false
+    description: Target audience description (e.g. "people struggling with debt")
+    default: "general consumers"
+  - name: tone
+    required: false
+    description: "Tone: professional | casual | hype"
+    default: professional
+examples:
+  - /social-post-gen ClearDebt "people struggling with debt" professional
+  - /social-post-gen clearcart "online shoppers" casual
+  - /social-post-gen candyfair "teens and young adults" hype

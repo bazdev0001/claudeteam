@@ -1,0 +1,24 @@
+name: marketing-team
+description: Full marketing team in a script — 4 parallel agents (content, SEO, social, paid ads) synthesised into a 30-day CMO-level plan for any Apex product
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/marketing-team.sh <product-name> [launch|growth|retention]
+script: skills/marketing-team.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  mode: "launch (new product) | growth (scale) | retention (keep users) — default: growth"
+examples:
+  - bash skills/marketing-team.sh bankruptcy-app launch
+  - bash skills/marketing-team.sh cleardebt growth
+  - bash skills/marketing-team.sh voice-messenger retention
+output: |
+  - CMO synthesis: executive summary + week-by-week priorities + budget allocation
+  - Content strategy: pillar articles, email calendar, lead magnets
+  - SEO plan: keywords, on-page, link building, technical quick wins
+  - Social plan: platform ranking, content pillars, 30-day calendar, viral hooks
+  - Paid ads: ad creative briefs, audience segments, budget split, 30-day test plan
+  - Full report saved to obsidian/notes/marketing-plan-<product>-<mode>-<date>.md
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+agents: 5 (content, SEO, social, ads, synthesis)
+runtime: ~60-90 seconds

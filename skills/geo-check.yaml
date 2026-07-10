@@ -1,0 +1,28 @@
+name: geo-check
+description: Check if a website is blocking AI crawlers (GEO audit) — checks robots.txt, llms.txt, Cloudflare signals, schema.org structured data, and meta noai tags.
+version: 1.0.0
+author: Sage (mini-PC fleet)
+
+command: /geo-check
+usage: /geo-check <url>
+
+examples:
+  - /geo-check https://apex.socialtokens.site
+  - /geo-check https://example.com/page/
+
+dependencies:
+  - curl (HTTP requests — always available)
+  - grep, awk, python3 (text parsing — always available)
+
+what_it_does:
+  1. Fetches robots.txt and checks for GPTBot, ClaudeBot, PerplexityBot, CCBot blocks
+  2. Checks if /llms.txt exists (new AI-friendly standard)
+  3. Inspects response headers for Cloudflare AI-blocking signals
+  4. Fetches the page and checks for schema.org JSON-LD structured data
+  5. Checks for <meta name="robots"> noindex or noai directives
+  6. Outputs a clean pass/fail report with one-line recommendations
+
+scope: Any machine with curl
+api_calls: Zero (fully local curl requests)
+output: pass/fail for each check + recommendations
+script: skills/geo-check.sh

@@ -1,0 +1,41 @@
+name: video-script
+description: Generate platform-optimized short-form video scripts for brand content (NOT UGC) — TikTok, Instagram Reels, YouTube Shorts. Produces hooks, timestamped scripts, on-screen text overlays, audio mood, captions, hashtags, thumbnail text, and A/B hook variants.
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/video-script.sh <product-name> [tiktok|reels|shorts|all] [problem|solution|story|proof|myth] [1-5]
+script: skills/video-script.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  platform: "tiktok | reels | shorts | all (default: all)"
+  angle: "problem | solution | story | proof | myth (default: problem)"
+  n-scripts: "Number of scripts to generate, 1-5 (default: 1)"
+angles:
+  problem: Opens with the pain point, agitates it, reveals the product as relief
+  solution: '"POV: you found out about X" — benefit-first hook, outcome leads'
+  story: Before/after narrative — 3 acts, emotional arc, real human journey
+  proof: Social proof hook — "X people did Y and here is what happened"
+  myth: Myth-busting — "You do not need a lawyer to file bankruptcy. Here is why."
+platforms:
+  tiktok: 30-60s, hook in first 1s, trending audio suggestions, text overlay cues
+  reels: 15-30s, visual-first, 3-act structure, shot descriptions, music mood
+  shorts: 45-60s, SEO title, chapter markers, thumbnail text, end-card CTA
+output_per_script: |
+  - Hook (first 1-3 seconds — the make-or-break line)
+  - Full script with timestamps [0:00-0:03] etc.
+  - On-screen text overlays at each moment
+  - Audio / music mood suggestion
+  - Caption with platform-appropriate hashtags
+  - Thumbnail text (5 words max)
+  - 2 A/B hook variants to test
+examples:
+  - bash skills/video-script.sh bankruptcy-app tiktok myth 2
+  - bash skills/video-script.sh bankruptcy-app all solution 1
+  - bash skills/video-script.sh cleardebt reels story 3
+  - bash skills/video-script.sh bankruptcy-app shorts proof 2
+output: |
+  Saved to: obsidian/notes/video-script-<product>-<platform>-<date>.md
+  Also copied to: <product>/marketing/11-video-scripts.md (if marketing folder exists)
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+agents: 2 parallel (TikTok+Reels call, Shorts call)
+runtime: ~20-40 seconds

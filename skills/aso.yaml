@@ -1,0 +1,23 @@
+name: aso
+description: App Store Optimization — generates complete iOS App Store and/or Google Play listing copy ready to paste into App Store Connect or Play Console
+version: 1.0.0
+author: Sage (mini-PC fleet)
+usage: bash skills/aso.sh <product-name> [ios|android|both]
+script: skills/aso.sh
+args:
+  product-name: Apex product name (matches folder in /home/barry/apex/projects/)
+  store: "ios (default) | android | both"
+examples:
+  - bash skills/aso.sh bankruptcy-app ios
+  - bash skills/aso.sh cleardebt both
+  - bash skills/aso.sh voice-messenger android
+output: |
+  iOS: App Name (30 chars), Subtitle (30 chars), Keywords (100 chars), Description (4000 chars),
+       Short Description, What's New, 5 Screenshot Captions, 3 A/B test name variants
+  Android: App Title, Short Description (80 chars), Full Description (4000 chars),
+           Feature Graphic text, target keywords, content rating note
+  Saved to: obsidian/notes/aso-<product>-<store>-<date>.md
+  Also copied to: <product>/marketing/05-app-store-listing.md (if marketing folder exists)
+model: claude-haiku-4-5-20251001
+requires: headroom proxy at 127.0.0.1:8787
+runtime: ~20s (ios only), ~35s (both)

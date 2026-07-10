@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Bridge wrapper called from the (Windows) Claude channel session's Bash tool.
+# Takes an audio path in any common form (C:\..., C:/..., /c/..., /mnt/c/..., or a WSL path),
+# runs the free local faster-whisper transcriber inside WSL, and prints the transcript.
+#
+# Usage:  bash bin/tg-transcribe "<audio path>"  [language]
+set -euo pipefail
+# When called from Git Bash (the Windows session), stop MSYS from rewriting /home and /mnt
+# paths into Windows paths when they are passed to wsl.exe.
+export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*'
+in="${1:?usage: tg-transcribe <audio-path> [language]}"
+lang="${2:-}"
+
+# Normalize the path to something WSL can open.
+p="${in//\\//}"                       # backslashes -> forward slashes
+case "$p" in
+  [A-Za-z]:/*)                        # C:/Users/...  ->  /mnt/c/Users/...
+    drive="$(printf '%s' "${p%%:*}" | tr 'A-Z' 'a-z')"
+    p="/mnt/${drive}/${p#*:/}" ;;
+  //wsl.localhost/*|//wsl\$/*)         # //wsl.localhost/Ubuntu/home/...  -> /home/...
+    p="/${p#*/*/*/}" ;;
+  /c/*|/d/*|/e/*)                     # git-bash drive form -> /mnt/c/...
+    p="/mnt/${p:1}" ;;
+esac
+
+WTRANS="/home/barry/projects/claudeteam/bin/transcribe.sh"
+wsl.exe -d Ubuntu -- bash -lc "$WTRANS \"$p\" \"$lang\""

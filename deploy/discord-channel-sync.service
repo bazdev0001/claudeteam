@@ -1,0 +1,8 @@
+[Unit]
+Description=Sync all Discord guild channels into both bots' allowlists
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /home/barry/projects/claudeteam/bin/sync-discord-channels.py

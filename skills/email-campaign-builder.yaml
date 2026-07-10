@@ -1,0 +1,14 @@
+name: email-campaign-builder
+description: Generate a complete email campaign sequence for any Apex product
+usage: bash skills/email-campaign-builder.sh <product-name> [goal] [num-emails]
+arguments:
+  product-name: Name of the Apex product (matches folder in /home/barry/apex/projects/)
+  goal: "launch (default) | nurture | reactivation"
+  num-emails: "3-7 (default: 5)"
+examples:
+  - bash skills/email-campaign-builder.sh cleardebt launch 5
+  - bash skills/email-campaign-builder.sh voice-messenger nurture 3
+  - bash skills/email-campaign-builder.sh bankruptcy-app reactivation 4
+output: Full email sequence with subject lines, preview text, body, CTA, and send timing
+model: claude-haiku-4-5-20251001
+requires: headroom proxy running at 127.0.0.1:8787
