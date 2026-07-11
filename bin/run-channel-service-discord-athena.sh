@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Service entrypoint for Athena's Discord presence in "The Bazment".
+# Service entrypoint for Athena's Discord presence in the fleet Discord server.
 # Mirrors the Sage Discord service but uses Athena's isolated state dir + token + soul.
 export PATH="$HOME/.local/bin:$HOME/.bun/bin:$HOME/.hermes/node/bin:$PATH"
 export CLAUDE_CHANNEL_HOST="minipc"

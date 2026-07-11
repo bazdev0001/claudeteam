@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Agent identity — required by agents-general-execution.sh (FATAL if unset)
-export BAZMENT_AGENT="athena"
+export FLEET_AGENT="athena"
 
 # Node-local soul for Athena's Discord presence — lives OUTSIDE the synced repo.
 SOUL="$HOME/.claude/claudeteam-discord-athena-soul.md"

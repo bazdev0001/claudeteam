@@ -164,3 +164,7 @@ in /home/barry/apex/agents/Rules.md. Agents: post errors to Discord #software; o
 Header is now FIVE lines, not four. Add after Response time:
 Number of rules: <count>   ← grep -c "^## " ~/projects/claudeteam/rules.md
 This confirms the agent read the latest rules.md. Count must match actual file.
+
+## Rules added 2026-07-10 (merged from new-rules.md)
+The delegation rule is called the **zero-second response rule**, not the "5-second rule."
+Ack must go out INSTANTLY (0 seconds) — not "within 5 seconds." Any reference to "5-second delegation" in rules.md, CLAUDE.md, or obsidian/agents/ must be updated to "zero-second response rule."

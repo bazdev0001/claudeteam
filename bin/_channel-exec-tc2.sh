@@ -4,7 +4,7 @@
 set -euo pipefail
 
 # Agent identity — required by agents-general-execution.sh (FATAL if unset)
-export BAZMENT_AGENT="sage"
+export FLEET_AGENT="sage"
 
 # Node-local personality ("soul") for tc2 — lives OUTSIDE the synced repo, unique to this node.
 SOUL="$HOME/.claude/claudeteam-tc2-soul.md"

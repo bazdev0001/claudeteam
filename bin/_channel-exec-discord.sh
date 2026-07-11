@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Agent identity — required by agents-general-execution.sh (FATAL if unset)
-export BAZMENT_AGENT="sage"
+export FLEET_AGENT="sage"
 
 # Node-local soul for the Discord presence — lives OUTSIDE the synced repo.
 SOUL="$HOME/.claude/claudeteam-discord-soul.md"
