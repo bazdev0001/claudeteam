@@ -20,8 +20,8 @@ MAX_PER_HOUR=3
 
 # service|inbox
 NODES=(
-  "claudeteam-channel-tc2.service|$HOME/.claude/channels/telegram-tc2/inbox"
-  "claudeteam-channel.service|$HOME/.claude/channels/telegram/inbox"
+  "claudeteam-channel-tc2.service|$HOME/apex/agents/sage/telegram/inbox"
+  "claudeteam-channel.service|$HOME/apex/agents/athena/telegram/inbox"
   "claudeteam-channel-discord.service|$HOME/.claude/channels/discord/inbox"
   "claudeteam-channel-discord-athena.service|$HOME/.claude/channels/discord-athena/inbox"
 )

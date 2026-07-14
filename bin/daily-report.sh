@@ -13,8 +13,8 @@ export PATH="$HOME/.local/bin:$HOME/.bun/bin:$HOME/.hermes/node/bin:$PATH"
 
 # Bot token (same one the channel session uses).
 # shellcheck disable=SC1091
-source "$HOME/.claude/channels/telegram/.env"
-: "${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN missing in channels/.env}"
+source "$HOME/apex/agents/athena/telegram/.env"
+: "${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN missing in agents/athena/telegram/.env}"
 
 cd "$PROJ"
 

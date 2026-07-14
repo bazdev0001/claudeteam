@@ -9,8 +9,8 @@ CHAT_ID="${1:-6062064959}"
 if [ -n "$TELEGRAM_STATE_DIR" ] && [ -f "$TELEGRAM_STATE_DIR/.env" ]; then
     TOKEN=$(grep "^TELEGRAM_BOT_TOKEN=" "$TELEGRAM_STATE_DIR/.env" | cut -d= -f2-)
 else
-    # Fallback: search all known telegram channel dirs for any token
-    for dir in "$HOME"/.claude/channels/telegram-*; do
+    # Fallback: search all known telegram agent dirs for any token
+    for dir in "$HOME"/apex/agents/*/telegram; do
         [ -f "$dir/.env" ] || continue
         TOKEN=$(grep "^TELEGRAM_BOT_TOKEN=" "$dir/.env" 2>/dev/null | cut -d= -f2-)
         [ -n "$TOKEN" ] && break

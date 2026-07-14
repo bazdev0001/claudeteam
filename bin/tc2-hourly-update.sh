@@ -2,7 +2,7 @@
 # Hourly project report to Barry — filtered, grouped, readable on mobile.
 
 set -uo pipefail
-TG_ENV="$HOME/.claude/channels/telegram-tc2/.env"
+TG_ENV="$HOME/apex/agents/sage/telegram/.env"
 CHAT_ID="6062064959"
 TRACKER="$HOME/.cache/tc2-project-tracker.txt"
 [ -f "$TRACKER" ] || exit 0

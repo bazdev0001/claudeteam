@@ -13,8 +13,8 @@
 # down (plain outbound HTTPS, independent of the channel plugin).
 set -uo pipefail
 
-NOTIFY_ENV="/home/barry/.claude/channels/telegram/.env"            # tc1/Athena bot = the alerter
-NOTIFY_ACCESS="/home/barry/.claude/channels/telegram/access.json"  # Barry's DM id (allowFrom)
+NOTIFY_ENV="/home/barry/apex/agents/athena/telegram/.env"            # tc1/Athena bot = the alerter
+NOTIFY_ACCESS="/home/barry/apex/agents/athena/telegram/access.json"  # Barry's DM id (allowFrom)
 STATE="/tmp/fleet-alerter.state"   # "YYYY-MM-DD <byteoffset>"
 BEAT="/tmp/fleet-alerter.log"
 INTERVAL=5

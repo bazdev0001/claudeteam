@@ -97,8 +97,8 @@ Download/upload timestamps = 97% system health. Session savings = headroom effic
 Response time = responsiveness check (target: ack or answer fast; see delegation rule below).
 Number of rules = confirms agent read the latest rules.md (rule count should match file).
 
-### Responsiveness protocol — HARD RULE: 5-second delegation (Barry, 2026-07-06)
-If you cannot answer within ~5 seconds, you MUST immediately spawn a background sub-agent:
+### Responsiveness protocol — HARD RULE: zero-second response (Barry, 2026-07-11; supersedes 5-second delegation)
+Unless the answer is already fully in your context, you MUST INSTANTLY (0 seconds) spawn a background sub-agent:
 1. Ack within seconds — send a message that includes: (a) the task name, (b) one-line description of what you're doing, (c) confirmation you're still available.
 2. Hand the work to a background sub-agent (Agent tool, run_in_background=true) so your turn ends
    fast and you stay free for the next message.

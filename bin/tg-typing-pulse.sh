@@ -10,11 +10,11 @@
 #
 # Fully fire-and-forget: never blocks, never errors out a tool call.
 set +e
-# Node-aware: each fleet node exports TELEGRAM_STATE_DIR (e.g. telegram-tc2) in its
+# Node-aware: each fleet node exports TELEGRAM_STATE_DIR (e.g. ~/apex/agents/sage/telegram) in its
 # run-channel-service-*.sh, and hooks inherit it. Pulse the bot THIS node actually
 # talks through — not the generic telegram/ dir, which is a different bot id Barry
 # never sees on this node. Falls back to the default dir for legacy single-bot nodes.
-STATE_DIR="${TELEGRAM_STATE_DIR:-$HOME/.claude/channels/telegram}"
+STATE_DIR="${TELEGRAM_STATE_DIR:-$HOME/apex/agents/athena/telegram}"
 ENV_FILE="$STATE_DIR/.env"
 CHAT_ID="6062064959"   # Barry's DM chat
 

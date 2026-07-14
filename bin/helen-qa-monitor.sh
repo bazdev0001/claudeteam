@@ -10,7 +10,7 @@ VPS="barry@srv1601002.hstgr.cloud"
 STATUS="$HOME/.cache/helen-qa-status"
 ALERTED="$HOME/.cache/helen-qa-alerted"
 LOG="$HOME/.cache/helen-qa-monitor.log"
-ENV_FILE="$HOME/.claude/channels/telegram-tc2/.env"
+ENV_FILE="$HOME/apex/agents/sage/telegram/.env"
 CHAT_ID="6062064959"
 
 now=$(date +%s)

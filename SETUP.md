@@ -18,8 +18,10 @@ GOTCHAS, they will bite again on the VPS/Mac).
 ## ~/.claude config that MUST be in place (else the session silently won't start)
 - `~/.claude/.credentials.json` — login (copied from the Windows install; reused fine).
 - `~/.claude/settings.json` — has `enabledPlugins.telegram@... = true`, `skipDangerousModePermissionPrompt`.
-- `~/.claude/channels/telegram/.env` — `TELEGRAM_BOT_TOKEN` (no BOM!), bot `@Bazminipcclaude02bot` (8682389341).
-- `~/.claude/channels/telegram/access.json` — `{"dmPolicy":"allowlist","allowFrom":["6062064959"]}` (skips pairing).
+- `~/apex/agents/athena/telegram/.env` — `TELEGRAM_BOT_TOKEN` (no BOM!), alerter bot token.
+- `~/apex/agents/athena/telegram/access.json` — `{"dmPolicy":"allowlist","allowFrom":["6062064959"]}` (skips pairing).
+- `~/apex/agents/sage/telegram/.env` — `TELEGRAM_BOT_TOKEN` for tc2 (Sage), bot `@Bazminipcclaude02bot` (8709578393).
+- Note: All agent Telegram state now lives under `~/apex/agents/<name>/telegram/` — NOT `~/.claude/channels/`.
 - `~/.claude/plugins/{known_marketplaces,installed_plugins}.json` — paths must be **Linux** (`/home/...`), not `C:\...`.
 - `~/.claude.json` flags (the onboarding/trust/permission gates that block a headless session):
   - `hasCompletedOnboarding: true`
@@ -42,6 +44,36 @@ GOTCHAS, they will bite again on the VPS/Mac).
 - Restart: `systemctl --user restart claudeteam-channel.service`
 - Logs: `journalctl --user -u claudeteam-channel.service` (noisy: the claude TUI renders into the pty).
 - Proof it's polling Telegram: a `getUpdates` call returns HTTP 409 Conflict.
+
+## Windows WSL Watchdog
+
+WSL can be shut down by Windows (updates, Power Automate, user logout) — killing all services
+and causing fleet downtime. The watchdog restores WSL automatically without user action.
+
+**Files:**
+- `windows/wsl-watchdog.ps1` — checks if Ubuntu distro is running; if not, starts it. Runs silently; only logs on problems.
+- `windows/install-wsl-watchdog.ps1` — registers a Windows Task Scheduler job (no admin needed).
+
+**Install (one-time, run from PowerShell on Windows):**
+```powershell
+# From the repo root (\\wsl.localhost\Ubuntu\home\barry\projects\claudeteam\windows\)
+.\windows\install-wsl-watchdog.ps1
+```
+
+**What it does:**
+- Triggers at Windows logon (2-min delay, letting WSL settle) + every 10 min thereafter.
+- On distro down: starts WSL, waits 15s, verifies recovery. Logs to `C:\claudeteam\watchdog.log`.
+- On distro up: exits silently (no log spam).
+
+**Log location:** `C:\claudeteam\watchdog.log` (auto-trimmed to last 500 lines).
+
+**Test immediately after install:**
+```powershell
+Start-ScheduledTask -TaskName "ClaudeTeam-WSL-Watchdog"
+```
+
+**Root cause (2026-07-14):** WSL was shut down for 16.7h by Windows without restarting — all
+systemd services (including the Telegram bot) went offline. This watchdog prevents recurrence.
 
 ## GOTCHAS (will recur on VPS/Mac)
 1. Headless claude needs a pty (`script`), or it exits via `--print`.

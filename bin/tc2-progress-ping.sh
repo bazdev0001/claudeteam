@@ -15,7 +15,7 @@ IN="$CACHE/tc2-last-inbound"
 OUT="$CACHE/tc2-last-reply"
 PING="$CACHE/tc2-last-ping"
 JSONL_DIR="$HOME/.claude/projects/-home-barry-projects-claudeteam"
-ENV_FILE="$HOME/.claude/channels/telegram-tc2/.env"
+ENV_FILE="$HOME/apex/agents/sage/telegram/.env"
 CHAT_ID="6062064959"
 
 [ -f "$IN" ] || exit 0

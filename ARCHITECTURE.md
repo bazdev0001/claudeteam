@@ -71,6 +71,17 @@ Resetting context is safe *only because* everything important is flushed to the 
 - One technical wrinkle: `claude --channels` is interactive; headless it may EOF-exit →
   wrap in a pseudo-terminal (`script`/`setsid` on *nix). To be confirmed during build.
 
+## WSL hosts — additional Windows-side watchdog required
+On Windows/WSL hosts, systemd `Restart=always` only covers process crashes *inside* WSL.
+Windows can shut down the entire WSL distro (updates, Power Automate, user actions) — killing
+all services instantly with no auto-recovery. This is not visible to systemd.
+
+**Fix: Windows Task Scheduler watchdog** (`windows/wsl-watchdog.ps1`):
+- Polls `wsl --list --running` every 10 min + at logon (2-min delay).
+- Restarts WSL if distro is down; logs to `C:\claudeteam\watchdog.log`.
+- Install: `.\windows\install-wsl-watchdog.ps1` (no admin needed, current-user task).
+- Root cause: 16.7h downtime on 2026-07-14 from this exact gap. Now fixed.
+
 ## Voice (inbound Telegram/Slack voice → text)
 - Voice notes arrive as OGG/Opus files. Pipeline: download file → transcribe → inject text.
 - Engine: **local Whisper** in WSL/Linux (faster-whisper / whisper.cpp). No per-message API
