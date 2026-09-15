@@ -32,9 +32,19 @@ newest_jsonl=$(find "$JSONL_DIR" -maxdepth 1 -name '*.jsonl' -printf '%T@\n' 2>/
 [ -n "${newest_jsonl:-}" ] || exit 0
 (( now - newest_jsonl <= 180 )) || exit 0       # not actively working -> frozen tooling handles it
 
-# shellcheck disable=SC1090
-. "$ENV_FILE" 2>/dev/null
-[ -n "${TELEGRAM_BOT_TOKEN:-}" ] || exit 0
+# Token: prefer the service unit's Environment= (per-node, authoritative), fall back to the
+# .env file. Verified 2026-09-15: no .env exists under ~/apex/agents/sage/telegram/, so the
+# bare `. "$ENV_FILE"` left TELEGRAM_BOT_TOKEN empty and this ping exited 0 every minute —
+# silently dead. Timer ran, script did nothing. (Same silent-death class as ISS-003/006.)
+if [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
+  # shellcheck disable=SC1090
+  . "$ENV_FILE" 2>/dev/null
+fi
+[ -n "${TELEGRAM_BOT_TOKEN:-}" ] || {
+  echo "$(date '+%F %T') progress-ping: no TELEGRAM_BOT_TOKEN (env or $ENV_FILE) — cannot ping" \
+    >> "$HOME/logs/fleet-health.log" 2>/dev/null
+  exit 0
+}
 
 mins=$(( (now - in_t) / 60 ))
 curl -s --max-time 5 "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
