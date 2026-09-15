@@ -8,6 +8,7 @@
 # file and the audit passes. Built != deployed.
 minipc|tc-bridge-guardian.service|0
 minipc|fleet-reply-guarantee.timer|20
+minipc|fleet-push-verify.timer|90
 minipc|answer-monitor.service|0
 minipc|fleet-alerter.service|0
 minipc|apex-heartbeat.timer|20
