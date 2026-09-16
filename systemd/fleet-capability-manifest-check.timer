@@ -1,0 +1,12 @@
+[Unit]
+Description=Fleet: capability manifest assertion check
+After=network-online.target
+
+[Timer]
+OnBootSec=5min
+OnCalendar=*-*-* 02:00:00
+Unit=fleet-capability-manifest-check.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

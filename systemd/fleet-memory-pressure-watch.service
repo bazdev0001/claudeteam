@@ -1,0 +1,10 @@
+[Unit]
+Description=Fleet: memory pressure watcher
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=barry
+ExecStart=/home/barry/projects/claudeteam/bin/fleet-memory-pressure-watch.sh
+StandardOutput=journal
+StandardError=journal

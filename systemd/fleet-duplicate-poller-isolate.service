@@ -1,0 +1,10 @@
+[Unit]
+Description=Fleet: plugin cache isolation
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=barry
+ExecStart=/home/barry/projects/claudeteam/bin/fleet-duplicate-poller-isolate.sh all
+StandardOutput=journal
+StandardError=journal

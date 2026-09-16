@@ -1,0 +1,10 @@
+[Unit]
+Description=Fleet: capability manifest checker
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=barry
+ExecStart=/home/barry/projects/claudeteam/bin/fleet-capability-manifest-check.sh
+StandardOutput=journal
+StandardError=journal

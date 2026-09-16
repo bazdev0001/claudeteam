@@ -1,0 +1,42 @@
+# monitor-manifest.txt — every monitor that MUST be scheduled and running, fleet-wide.
+# Format: host|unit-or-task|max-age-minutes
+#   host: minipc (WSL user units) | windows (Task Scheduler) | vps-barry | vps-apex
+#   unit-or-task: .timer/.service unit name, or Windows task name
+#   max-age-minutes: last run must be within this window (0 = daemon: just enabled+active)
+# Checked daily by monitor-manifest-audit.timer -> bin/monitor-manifest-audit.sh.
+# RULE (agent-reliability-standard #10): a monitor is NOT deployed until it is in this
+# file and the audit passes. Built != deployed.
+minipc|tc-bridge-guardian.service|0
+minipc|fleet-reply-guarantee.timer|20
+minipc|fleet-push-verify.timer|90
+minipc|answer-monitor.service|0
+minipc|fleet-alerter.service|0
+minipc|apex-heartbeat.timer|20
+minipc|tc-intelligent-reset.timer|20
+minipc|tc2-progress-ping.timer|20
+minipc|helen-qa-monitor.timer|20
+# REMOVED 2026-09-15: apex-ada-vps-watchdog.timer — Ada was retired from the fleet (units
+# backed up to bin/ada-watchdog-backup-20260905-003646/, and obsidian/STATUS.md records the
+# role split into Helen+Rachel). The manifest kept demanding a monitor for an agent that no
+# longer exists, so the daily audit failed on it every day for weeks.
+minipc|minipc-heartbeat-push.timer|20
+minipc|minipc-disk-monitor.timer|60
+minipc|minipc-clock-doctor.timer|30
+minipc|fleet-hourly-status.timer|960
+minipc|claudeteam-reset.timer|1560
+minipc|nightly-journal-review.timer|1560
+# Fleet health — items 3-6, 8 (2026-09-15 Barry: complete everything)
+minipc|fleet-duplicate-poller-isolate.timer|1560
+minipc|fleet-token-refresh-watch.timer|60
+minipc|fleet-crash-loop-watch.timer|15
+minipc|fleet-capability-manifest-check.timer|1440
+minipc|fleet-memory-pressure-watch.timer|30
+# RENAMED 2026-09-15: the Windows task is registered as ApexFleet-WSL-Watchdog (State: Ready),
+# not ClaudeTeam-WSL-Watchdog. The manifest carried the old name, so the audit reported
+# "task not found" daily while the watchdog was actually running fine.
+windows|ApexFleet-WSL-Watchdog|30
+vps-barry|helen-conn-watchdog.timer|15
+vps-barry|apex-heartbeat.timer|20
+vps-barry|minipc-heartbeat-check.timer|20
+vps-barry|telegram-conflict-check.timer|20
+vps-apex|vps-clock-doctor.timer|30
