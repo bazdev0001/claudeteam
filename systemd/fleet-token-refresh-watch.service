@@ -1,0 +1,10 @@
+[Unit]
+Description=Fleet: OAuth token refresh watcher
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=barry
+ExecStart=/home/barry/projects/claudeteam/bin/fleet-token-refresh-watch.sh
+StandardOutput=journal
+StandardError=journal

@@ -1,0 +1,12 @@
+[Unit]
+Description=Fleet: memory pressure watcher
+After=network-online.target
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=15min
+Unit=fleet-memory-pressure-watch.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

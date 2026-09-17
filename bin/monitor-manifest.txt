@@ -25,6 +25,12 @@ minipc|minipc-clock-doctor.timer|30
 minipc|fleet-hourly-status.timer|960
 minipc|claudeteam-reset.timer|1560
 minipc|nightly-journal-review.timer|1560
+# Fleet health — items 3-6, 8 (2026-09-15 Barry: complete everything)
+minipc|fleet-duplicate-poller-isolate.timer|1560
+minipc|fleet-token-refresh-watch.timer|60
+minipc|fleet-crash-loop-watch.timer|15
+minipc|fleet-capability-manifest-check.timer|1440
+minipc|fleet-memory-pressure-watch.timer|30
 # RENAMED 2026-09-15: the Windows task is registered as ApexFleet-WSL-Watchdog (State: Ready),
 # not ClaudeTeam-WSL-Watchdog. The manifest carried the old name, so the audit reported
 # "task not found" daily while the watchdog was actually running fine.

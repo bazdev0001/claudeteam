@@ -1,0 +1,12 @@
+[Unit]
+Description=Fleet: plugin cache isolation setup (one-time)
+After=network-online.target
+Wants=network-online.target
+
+[Timer]
+OnBootSec=2min
+Unit=fleet-duplicate-poller-isolate.service
+Persistent=false
+
+[Install]
+WantedBy=timers.target

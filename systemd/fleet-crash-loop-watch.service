@@ -1,0 +1,10 @@
+[Unit]
+Description=Fleet: crash-loop rate watcher
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=barry
+ExecStart=/home/barry/projects/claudeteam/bin/fleet-crash-loop-watch.sh
+StandardOutput=journal
+StandardError=journal
