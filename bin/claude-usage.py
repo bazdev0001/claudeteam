@@ -37,10 +37,23 @@ RESET = re.compile(r"resets ([^\n·]+?)\s*\(([^)]+)\)")
 
 
 def fetch():
+    # ISS-007 fix (2026-07-18): this headless `claude -p` inherits the live agent's
+    # TELEGRAM_STATE_DIR, and the telegram plugin's server.ts SIGTERMs whatever PID
+    # is in <state-dir>/bot.pid ("replacing stale poller") — i.e. it KILLED the live
+    # agent's bun poller every time the Stop hook ran this. Two layers of defence:
+    #   1. --settings disables the channel plugins for this transient run.
+    #   2. Scratch state dirs: even if a poller spawns, it finds no bot.pid to kill
+    #      and no .env token, so it exits harmlessly.
+    env = dict(os.environ)
+    scratch = "/tmp/claude-usage-scratch"
+    env["TELEGRAM_STATE_DIR"] = scratch + "/telegram"
+    env["DISCORD_STATE_DIR"] = scratch + "/discord"
+    no_plugins = ('{"enabledPlugins":{"telegram@claude-plugins-official":false,'
+                  '"discord@claude-plugins-official":false}}')
     try:
         out = subprocess.run(
-            ["claude", "-p", "/usage"],
-            capture_output=True, text=True, timeout=TIMEOUT,
+            ["claude", "-p", "/usage", "--settings", no_plugins],
+            capture_output=True, text=True, timeout=TIMEOUT, env=env,
         ).stdout
     except FileNotFoundError:
         return None, "claude CLI not found on PATH"

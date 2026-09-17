@@ -6,12 +6,12 @@ set -euo pipefail
 export FLEET_AGENT="athena"
 
 # Node-local soul for Athena's Discord presence — lives OUTSIDE the synced repo.
-SOUL="$HOME/.claude/claudeteam-discord-athena-soul.md"
+SOUL="$HOME/.claude/apex-discord-athena-soul.md"
 ARGS=()
 [ -f "$SOUL" ] && ARGS=(--append-system-prompt "$(cat "$SOUL")")
 
 # Route through headroom proxy if running (context compression)
-if curl -sf http://127.0.0.1:8787/health >/dev/null 2>&1; then
+if curl -sf --connect-timeout 2 --max-time 3 http://127.0.0.1:8787/health >/dev/null 2>&1; then
   export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
 fi
 

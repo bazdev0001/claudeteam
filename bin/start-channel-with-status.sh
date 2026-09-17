@@ -7,7 +7,7 @@ echo " Bot: @Bazminipcclaude02bot"
 echo " With: Automatic Status Header (restart time + latest updates)"
 echo "==============================================================="
 
-SOUL="$HOME/.claude/claudeteam-channel-soul.md"
+SOUL="$HOME/.claude/apex-channel-soul.md"
 SOUL_ARGS=()
 [ -f "$SOUL" ] && SOUL_ARGS=(--append-system-prompt "$(cat "$SOUL")")
 

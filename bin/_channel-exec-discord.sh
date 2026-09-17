@@ -6,12 +6,12 @@ set -euo pipefail
 export FLEET_AGENT="sage"
 
 # Node-local soul for the Discord presence — lives OUTSIDE the synced repo.
-SOUL="$HOME/.claude/claudeteam-discord-soul.md"
+SOUL="$HOME/.claude/apex-discord-soul.md"
 ARGS=()
 [ -f "$SOUL" ] && ARGS=(--append-system-prompt "$(cat "$SOUL")")
 
 # Route through headroom proxy if running (context compression)
-curl -sf http://127.0.0.1:8787/health >/dev/null 2>&1 && export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
+curl -sf --connect-timeout 2 --max-time 3 http://127.0.0.1:8787/health >/dev/null 2>&1 && export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
 
 exec claude --dangerously-skip-permissions \
   --model claude-sonnet-4-6 \

@@ -23,7 +23,13 @@ journal_for() { echo "/home/barry/projects/obsidian/journal/$1.md"; }
 
 send() {
   local text="$1" token chat
-  token=$(grep -oE 'TELEGRAM_BOT_TOKEN=.*' "$NOTIFY_ENV" 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' "'"'"'\r\n')
+  # Athena's token lives as Environment= in the live systemd unit, not a .env file
+  # (that file stopped existing at some point — this is why alerts silently died).
+  token=$(systemctl --user show claudeteam-channel.service --property=Environment --value 2>/dev/null \
+    | grep -oE 'TELEGRAM_BOT_TOKEN=[^ ]+' | cut -d= -f2-)
+  if [[ -z "$token" ]]; then
+    token=$(grep -oE 'TELEGRAM_BOT_TOKEN=.*' "$NOTIFY_ENV" 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' "'"'"'\r\n')
+  fi
   chat=$(grep -oE '[0-9]{6,}' "$NOTIFY_ACCESS" 2>/dev/null | head -1)
   if [[ -z "$token" || -z "$chat" ]]; then
     echo "[$(date +%F\ %T)] NO token/chat — cannot send: $text" >> "$BEAT"; return 0
@@ -70,6 +76,17 @@ while true; do
         *"❌ guardian:"*)
           node=$(echo "$line" | grep -oE '[a-z0-9]+\([A-Za-z]+/[a-z]+\)' | head -1)
           send "🚨 Fleet: ${node:-a node} auto-restart FAILED — needs manual check: run fleet-status, then systemctl --user restart the service."
+          ;;
+        *"🔴 answer-monitor:"*)
+          agent=$(echo "$line" | grep -oE '[a-z]+-(telegram|discord)' | head -1)
+          send "🔴 Fleet: ${agent:-a node} sent Barry a message with no reply for 5+ min (rules #22) — answer-monitor is on it."
+          ;;
+        *"♻️ answer-monitor: restarted"*)
+          agent=$(echo "$line" | grep -oE '[a-z]+-(telegram|discord)' | head -1)
+          send "✅ Fleet self-healed: ${agent:-a node} was unresponsive to an inbound message — auto-restarted. (no action needed)"
+          ;;
+        *"❌ answer-monitor:"*)
+          send "🚨 Fleet: answer-monitor restart FAILED — needs manual check: run fleet-status, then check the service."
           ;;
       esac
     done <<< "$new"

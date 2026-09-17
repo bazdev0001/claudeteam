@@ -7,7 +7,7 @@ echo " Bot: @Bazminipcclaude02bot"
 echo " With: Automatic Status Header (restart + latest updates)"
 echo "==============================================================="
 
-SOUL="$HOME/.claude/claudeteam-channel-soul.md"
+SOUL="$HOME/.claude/apex-channel-soul.md"
 SOUL_ARGS=()
 [ -f "$SOUL" ] && SOUL_ARGS=(--append-system-prompt "$(cat "$SOUL")")
 
@@ -36,7 +36,7 @@ NO EXCEPTIONS. Every message, always.
 SOUL_ARGS+=(--append-system-prompt "$STATUS_INSTRUCTION")
 
 # Route through headroom proxy if running (context compression)
-if curl -sf http://127.0.0.1:8787/health >/dev/null 2>&1; then
+if curl -sf --connect-timeout 2 --max-time 3 http://127.0.0.1:8787/health >/dev/null 2>&1; then
   export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
 fi
 

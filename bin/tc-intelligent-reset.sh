@@ -22,8 +22,8 @@ MAX_PER_HOUR=3
 NODES=(
   "claudeteam-channel-tc2.service|$HOME/apex/agents/sage/telegram/inbox"
   "claudeteam-channel.service|$HOME/apex/agents/athena/telegram/inbox"
-  "claudeteam-channel-discord.service|$HOME/.claude/channels/discord/inbox"
-  "claudeteam-channel-discord-athena.service|$HOME/.claude/channels/discord-athena/inbox"
+  "claudeteam-channel-discord-sage.service|$HOME/apex/agents/sage/discord/inbox"
+  "claudeteam-channel-discord-athena.service|$HOME/apex/agents/athena/discord/inbox"
 )
 
 mkdir -p "$STAMPS_DIR" "$(dirname "$LOG")"
@@ -55,5 +55,7 @@ for entry in "${NODES[@]}"; do
 
   log "RESTART $svc: FROZEN (msg waited $(( (now-newest_inbox)/60 ))min, no session activity since)"
   echo "$now" >> "$stamps"
+  # Pre-restart context backup -> obsidian/journal/journal-new.md (merged+cleared on next startup)
+  "$HOME/projects/claudeteam/bin/journal-new-backup.sh" "intelligent-reset: $svc frozen" 2>>"$LOG" || true
   systemctl --user restart "$svc"
 done

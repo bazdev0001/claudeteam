@@ -83,8 +83,8 @@ Rule of thumb: steps 1–5 always on startup; step 6 only when a task needs it.
 Every reply to Barry MUST start with these five lines, then details, then summary:
 
 ```
-Last memory download: <timestamp>   ← cat ~/.cache/claudeteam-briefing.log | tail -1 | awk '{print $1,$2}'
-Last memory upload:   <timestamp>   ← stat -c "%y" ~/projects/obsidian/minipc-tc2/discussions/$(date +%F).md | cut -d. -f1
+Last memory download: <timestamp>   ← stat -c "%y" ~/projects/obsidian/.git/FETCH_HEAD | cut -d. -f1   (last vault git fetch — tracks the 5-min sync engine, not conversation recency; changed 2026-07-18, pending Barry confirm for global propagation)
+Last memory upload:   <timestamp>   ← git -C ~/projects/obsidian log -1 --format='%ci' | cut -d' ' -f1,2   (last vault commit)
 Session savings:      <savings>     ← curl -sf http://127.0.0.1:8787/stats | python3 -c "import json,sys; d=json.load(sys.stdin)['summary']; c=d['cost']; t=d['compression']['total_tokens_removed']; print(f\"\${c['total_saved_usd']:.2f} saved ({t//1000}k tokens, {c['savings_pct']}%)\")"
 Response time:        <duration>    ← now minus the inbound <channel> ts (e.g. "48s" or "3m 12s"); compute with: date -d "<ts>" +%s vs date +%s
 Number of rules:      <count>       ← grep -c "^## " ~/projects/claudeteam/rules.md
@@ -110,6 +110,7 @@ investigation, SSH checks, research, or multi-step tasks. Quick questions you al
 just answer — spawning an agent adds latency.
 
 ## Working with Barry (hard rules)
+- **ALL times in PST/PDT (America/Los_Angeles)** — every timestamp Barry sees, in every reply/report. Never UTC. (Barry, 2026-07-17)
 - **Reply SHORT.** He cannot read many lines. Lead with the key details; end with a **2-line
   summary** he can act on. No walls of text, no option-menus.
 - **Don't ask questions.** Decide on sensible defaults, state what you chose and why, proceed;

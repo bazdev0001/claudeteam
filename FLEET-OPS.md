@@ -82,7 +82,7 @@ fix** to the Claude Code channel plugin. See `docs/upstream-bridge-bug-report.md
 | tc1  | Athena (trading) | `claudeteam-channel.service` | `claudeteam-channel-discord-athena.service` |
 | tc2  | Sage (software)  | `claudeteam-channel-tc2.service` | `claudeteam-channel-discord.service` |
 
-Souls: `~/.claude/claudeteam-channel-soul.md` (Athena tg) · `~/.claude/claudeteam-tc2-soul.md` (Sage).
+Souls: `~/.claude/apex-channel-soul.md` (Athena tg) · `~/.claude/apex-tc2-soul.md` (Sage).
 Guardian script: `~/projects/claudeteam/bin/tc-bridge-guardian.sh`. Heartbeat: `/tmp/tc-watchdog.log`.
 
 _Last updated: 2026-06-26 by Claude Code (Opus) during the 24/7-hardening pass._

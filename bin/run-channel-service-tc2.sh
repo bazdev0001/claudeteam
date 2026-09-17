@@ -8,4 +8,4 @@ export FLEET_NODE="minipc-tc2"
 export TELEGRAM_STATE_DIR="$HOME/apex/agents/sage/telegram"
 cd "$HOME/projects/claudeteam" || exit 1
 # `script` provides the pty; claude --channels needs a TTY or it drops to --print mode.
-exec script -qfc "$HOME/projects/claudeteam/bin/_channel-exec-tc2.sh" /dev/null
+exec script -qfc "TELEGRAM_STATE_DIR=$HOME/apex/agents/sage/telegram $HOME/projects/claudeteam/bin/_channel-exec-tc2.sh" /dev/null

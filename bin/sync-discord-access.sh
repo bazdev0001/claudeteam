@@ -18,10 +18,10 @@
 set -uo pipefail
 
 OWNER_ID="804750929407901707"
-TOKEN_ENV="/home/barry/.claude/channels/discord-tc2/.env"   # any bot in the guild can list channels
+TOKEN_ENV="/home/barry/apex/agents/sage/discord/.env"   # any bot in the guild can list channels
 FILES=(
-  "/home/barry/.claude/channels/discord-tc2/access.json"
-  "/home/barry/.claude/channels/discord-athena/access.json"
+  "/home/barry/apex/agents/sage/discord/access.json"
+  "/home/barry/apex/agents/athena/discord/access.json"
 )
 ANCHOR_CHANNEL="1519237387262103625"   # a known channel, used to resolve the guild id
 

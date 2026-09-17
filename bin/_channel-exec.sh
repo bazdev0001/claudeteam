@@ -7,12 +7,12 @@ set -euo pipefail
 # Node-local personality ("soul"): lives OUTSIDE the synced claudeteam repo, so it is unique
 # to THIS machine's Telegram bot and never reaches GitHub/VPS, other fleet members, or the
 # ad-hoc Claude sessions started elsewhere on this PC. Skipped cleanly if absent.
-SOUL="$HOME/.claude/claudeteam-channel-soul.md"
+SOUL="$HOME/.claude/apex-channel-soul.md"
 ARGS=()
 [ -f "$SOUL" ] && ARGS=(--append-system-prompt "$(cat "$SOUL")")
 
 # Route through headroom proxy if running (context compression)
-curl -sf http://127.0.0.1:8787/health >/dev/null 2>&1 && export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
+curl -sf --connect-timeout 2 --max-time 3 http://127.0.0.1:8787/health >/dev/null 2>&1 && export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
 
 exec claude --dangerously-skip-permissions \
   --model claude-sonnet-4-6 \

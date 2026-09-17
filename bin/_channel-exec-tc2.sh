@@ -7,16 +7,16 @@ set -euo pipefail
 export FLEET_AGENT="sage"
 
 # Node-local personality ("soul") for tc2 — lives OUTSIDE the synced repo, unique to this node.
-SOUL="$HOME/.claude/claudeteam-tc2-soul.md"
+SOUL="$HOME/.claude/apex-tc2-soul.md"
 ARGS=()
 [ -f "$SOUL" ] && ARGS=(--append-system-prompt "$(cat "$SOUL")")
 
 # Route through headroom proxy if running (context compression)
-if curl -sf http://127.0.0.1:8787/health >/dev/null 2>&1; then
+if curl -sf --connect-timeout 2 --max-time 3 http://127.0.0.1:8787/health >/dev/null 2>&1; then
   export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
 fi
 
 exec claude --dangerously-skip-permissions \
-  --model claude-sonnet-4-6 \
+  --model claude-fable-5 \
   --channels plugin:telegram@claude-plugins-official \
   "${ARGS[@]}"

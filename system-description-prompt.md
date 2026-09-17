@@ -82,7 +82,7 @@ When a service starts (or restarts after a crash), it runs through a script chai
 3. Inside that fake terminal, the script launches Claude with these flags:
    - `--channels plugin:telegram` (or discord) — connects to the messaging platform
    - `--model sonnet` — uses Claude's Sonnet model
-   - `--append-system-prompt` — injects the agent's personality and identity from a local file (called a "soul file"). This is a plain text file describing who the agent is, their voice, their values. Sage's soul file lives at `~/.claude/claudeteam-tc2-soul.md`.
+   - `--append-system-prompt` — injects the agent's personality and identity from a local file (called a "soul file"). This is a plain text file describing who the agent is, their voice, their values. Sage's soul file lives at `~/.claude/apex-tc2-soul.md`.
 
 4. Claude Code then automatically loads configuration from `~/.claude/settings.json` and the project's `CLAUDE.md` files — these contain behavioural rules, permissions, and startup hooks.
 
@@ -238,8 +238,8 @@ Sage coordinates with Ada via Discord #management channel. Sophia will be the VP
 | ~/projects/claudeteam/bin/tg-say.sh | Text-to-speech (Piper) |
 | ~/projects/claudeteam/.tts-out/ | Where TTS audio files are saved |
 | ~/projects/obsidian/ | The shared memory vault |
-| ~/.claude/claudeteam-tc2-soul.md | Sage's identity/personality file (local only, not synced) |
-| ~/.claude/claudeteam-channel-soul.md | Athena's identity/personality file (local only, not synced) |
+| ~/.claude/apex-tc2-soul.md | Sage's identity/personality file (local only, not synced) |
+| ~/.claude/apex-channel-soul.md | Athena's identity/personality file (local only, not synced) |
 | ~/.claude/channels/telegram-tc2/ | Sage's Telegram state: inbox, credentials |
 | ~/.claude/channels/discord-tc2/ | Sage's Discord state |
 | ~/.claude/channels/telegram/ | Athena's Telegram state |
