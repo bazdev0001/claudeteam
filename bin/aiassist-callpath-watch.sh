@@ -8,7 +8,8 @@
 #      agent bound (this exact failure — number up, nothing answering — is how the line
 #      dies silently; the DID showed a bound agent agent_721f6... on 2026-09-19).
 #   3. That bound agent still exists / is retrievable (get-agent 200).
-#   4. The sales hub page is serving (apex.socialtokens.site/projects/ai-assistance/).
+#   4. The project pages are serving: root = project home (site restructure 2026-09-19),
+#      /website/ = the customer-facing site the outreach drafts link to.
 # WHAT IT CANNOT PROVE: actual audio pickup. Only a real call proves that, and every
 # real call is billed (CAPABILITIES.md: two AI agents talk to the 15-min cap). A daily
 # synthetic call is documented as a PROPOSAL in
@@ -30,7 +31,8 @@ set -uo pipefail
 NODE="sage"
 DID="+16504762005"                       # staging/demo ONLY. Fuller 1036 is off-limits.
 DID_ENC="%2B16504762005"
-HUB_URL="https://apex.socialtokens.site/projects/ai-assistance/"
+HUB_URL="https://apex.socialtokens.site/projects/ai-assistance/"          # project home since 2026-09-19
+SITE_URL="https://apex.socialtokens.site/projects/ai-assistance/website/" # customer site (outreach landing)
 STATUS_URL="https://status.retellai.com/api/v2/status.json"
 ENV_FILE="/home/barry/apex/.env"
 STATE_DIR="$(fleet_stamp_dir aiassist)"
@@ -85,19 +87,31 @@ except Exception: print("ERR:bad response")' 2>/dev/null)
   esac
 fi
 
-# --- 4. Hub page ---
+# --- 4. Project pages ---
 # Content check, not just 200: on 2026-09-19 ~22:09 PT the hub was clobbered by a
 # 396-byte "Moved" self-redirect stub written through the grok/ai-assistance symlink
-# (which points AT the hub file) and still served 200. Real hub is ~74KB and contains
-# the demo DID. Guard: minimum size + marker string.
+# (which points AT the hub file) and still served 200. Guard: minimum size + marker string.
+# Since the 2026-09-19 restructure: root is the PROJECT HOME (~9KB, marker "project home"
+# + the demo DID); /website/ is the CUSTOMER SITE (~48KB, contains the DID) — that's the
+# page outreach emails link, so it gets the same clobber guard.
 hub_body=$(curl -s -m 20 "$HUB_URL" 2>/dev/null)
 hub=$?
 if [[ $hub -ne 0 ]]; then
-  fails+=("hub page unreachable ($HUB_URL)")
-elif (( ${#hub_body} < 10000 )); then
-  fails+=("hub page suspiciously small (${#hub_body} bytes — symlink-clobber stub pattern?) ($HUB_URL)")
-elif ! grep -q '650' <<<"$hub_body"; then
-  fails+=("hub page serving but demo-DID marker missing — wrong content ($HUB_URL)")
+  fails+=("project home unreachable ($HUB_URL)")
+elif (( ${#hub_body} < 4000 )); then
+  fails+=("project home suspiciously small (${#hub_body} bytes — symlink-clobber stub pattern?) ($HUB_URL)")
+elif ! grep -qi 'project home' <<<"$hub_body" || ! grep -q '476-2005' <<<"$hub_body"; then
+  fails+=("project home serving but markers missing — wrong content ($HUB_URL)")
+fi
+
+site_body=$(curl -s -m 20 "$SITE_URL" 2>/dev/null)
+site=$?
+if [[ $site -ne 0 ]]; then
+  fails+=("customer site unreachable ($SITE_URL)")
+elif (( ${#site_body} < 10000 )); then
+  fails+=("customer site suspiciously small (${#site_body} bytes) ($SITE_URL)")
+elif ! grep -q '476-2005' <<<"$site_body"; then
+  fails+=("customer site serving but demo-DID marker missing — wrong content ($SITE_URL)")
 fi
 
 # --- state + alerting ---
