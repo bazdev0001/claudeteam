@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# RETIRED 2026-09-19 — timer disabled on both nodes. This only logged mtime staleness to
+# /tmp and never alerted; it stayed green through the Sep 9-19 Helen auth outage.
+# REPLACED BY: bin/fleet-auth-watch.sh (fleet-auth-watch.{service,timer}, hourly) which
+# reads real refresh-token expiry from ~/.claude/.credentials.json, probes the brain with
+# `claude -p`, and Telegram-alerts Barry at T-7d / on expiry / on probe failure.
 # Item 4: OAuth token refresh watch — tighten threshold, log every attempt's outcome
 # Problem: token expiration not caught until API call fails (mid-session).
 # Solution: proactive watch on ~/.claude/credentials or token cache, detect staleness.

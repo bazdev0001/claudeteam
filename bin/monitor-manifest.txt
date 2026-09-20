@@ -26,8 +26,19 @@ minipc|fleet-hourly-status.timer|960
 minipc|claudeteam-reset.timer|1560
 minipc|nightly-journal-review.timer|1560
 # Fleet health — items 3-6, 8 (2026-09-15 Barry: complete everything)
-minipc|fleet-duplicate-poller-isolate.timer|1560
-minipc|fleet-token-refresh-watch.timer|60
+# REMOVED 2026-09-19: fleet-duplicate-poller-isolate.timer — it is a ONE-TIME setup task
+# (OnBootSec=2min only, Persistent=false): it fires once per boot then sits "elapsed",
+# so any uptime > 26h makes a freshness check fail by construction. The isolation work
+# itself completed successfully (last clean run 2026-09-16 18:06 PDT, journal). A boot-
+# time setup task is not a recurring monitor and does not belong in this manifest.
+# REPLACED 2026-09-19: fleet-token-refresh-watch.timer -> fleet-auth-watch.timer. The old
+# watcher only logged mtime staleness to /tmp and never alerted; the VPS copy was worse
+# (checked a nonexistent tokens.json path + curled a nonexistent refresh endpoint) and sat
+# green for the whole Sep 9-19 Helen auth outage. fleet-auth-watch reads the real
+# ~/.claude/.credentials.json (refresh-token expiry = the login-death clock), runs an hourly
+# `claude -p` brain probe, and Telegram-alerts Barry at T-7d / on expiry / on probe failure.
+minipc|fleet-auth-watch.timer|90
+vps-barry|fleet-auth-watch.timer|90
 minipc|fleet-crash-loop-watch.timer|15
 minipc|fleet-capability-manifest-check.timer|1440
 minipc|fleet-memory-pressure-watch.timer|30
