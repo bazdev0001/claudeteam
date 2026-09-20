@@ -51,3 +51,6 @@ vps-barry|apex-heartbeat.timer|20
 vps-barry|minipc-heartbeat-check.timer|20
 vps-barry|telegram-conflict-check.timer|20
 vps-apex|vps-clock-doctor.timer|30
+# AI Assistance call-path (2026-09-19, production-readiness step 0.4 / gap O1): read-only
+# Retell platform + demo-DID agent-binding + hub-page watcher, 15-min cadence.
+minipc|aiassist-callpath-watch.timer|45
