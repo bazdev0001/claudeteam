@@ -86,8 +86,19 @@ except Exception: print("ERR:bad response")' 2>/dev/null)
 fi
 
 # --- 4. Hub page ---
-hub=$(curl -s -m 20 -o /dev/null -w '%{http_code}' "$HUB_URL" 2>/dev/null) || hub=000
-[[ "$hub" == "200" ]] || fails+=("hub page HTTP $hub ($HUB_URL)")
+# Content check, not just 200: on 2026-09-19 ~22:09 PT the hub was clobbered by a
+# 396-byte "Moved" self-redirect stub written through the grok/ai-assistance symlink
+# (which points AT the hub file) and still served 200. Real hub is ~74KB and contains
+# the demo DID. Guard: minimum size + marker string.
+hub_body=$(curl -s -m 20 "$HUB_URL" 2>/dev/null)
+hub=$?
+if [[ $hub -ne 0 ]]; then
+  fails+=("hub page unreachable ($HUB_URL)")
+elif (( ${#hub_body} < 10000 )); then
+  fails+=("hub page suspiciously small (${#hub_body} bytes — symlink-clobber stub pattern?) ($HUB_URL)")
+elif ! grep -q '650' <<<"$hub_body"; then
+  fails+=("hub page serving but demo-DID marker missing — wrong content ($HUB_URL)")
+fi
 
 # --- state + alerting ---
 now=$(date +%s)
@@ -103,7 +114,7 @@ if ((${#fails[@]} == 0)); then
     fleet_alert "$NODE" "✅ aiassist-callpath RECOVERED after ${dur_min}m — demo DID +1(650)476-2005 path checks all green (platform, DID bound, agent, hub)."
   fi
   echo "OK $now 0" > "$STATE_FILE"
-  fleet_log "[aiassist] callpath OK (platform=$plat hub=$hub)"
+  fleet_log "[aiassist] callpath OK (platform=$plat hub=${#hub_body}B)"
 else
   msg="🔴 aiassist-callpath: demo DID +1(650)476-2005 path FAILING — $(IFS='; '; echo "${fails[*]}"). Callers may be getting dead air. (read-only checks; no test call placed)"
   if [[ "$prev" != "FAIL" ]]; then
